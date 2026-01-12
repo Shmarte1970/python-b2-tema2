@@ -47,31 +47,53 @@ import pickle
 from typing import List, Union
 from matplotlib.figure import Figure
 from pandas.core.frame import DataFrame
+from pathlib import Path
 
 
 def create_histograms(df: DataFrame, features: List[str]) -> Figure:
-    # Write here your code
-    pass
+
+    n_features = len(features)
+    fig, axes = plt.subplots(n_features, 1, figsize=(8, 4 * n_features))
+
+    if n_features == 1:
+        axes = [axes]
+
+    for ax, feature in zip(axes, features):
+        sns.histplot(
+            data=df,
+            x=feature,
+            hue="target",
+            multiple="stack",
+            ax=ax
+        )
+        ax.set_title(f"Histogram of {feature}")
+
+    plt.tight_layout()
+    return fig
 
 
 def save_img_pickle(fig: Figure, filename: str) -> None:
-    # Write here your code
-    pass
 
+    path = Path(filename)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(path, "wb") as f:
+        pickle.dump(fig, f)
 
 def load_and_display_figure(filename: str) -> Figure:
-    # Write here your code
-    pass
+    with open(filename, "rb") as f:
+        fig = pickle.load(f)
 
+    return fig
 
 # Para probar el código, descomenta las siguientes líneas
-# if __name__ == "__main__":
-#     wine = load_wine()
-#     df_wine = pd.DataFrame(data=wine.data, columns=wine.feature_names)
-#     df_wine["target"] = pd.Categorical.from_codes(wine.target, wine.target_names)
+if __name__ == "__main__":
+     wine = load_wine()
+     df_wine = pd.DataFrame(data=wine.data, columns=wine.feature_names)
+     df_wine["target"] = pd.Categorical.from_codes(wine.target, wine.target_names)
 
-#     fig_histograms = create_histograms(df_wine, df_wine.columns[:6])
-#     is_saved = save_img_pickle(fig_histograms, "data/histograms_wine.pickle")
-#     print("Figure saved:", is_saved)
-#     fig_loaded = load_and_display_figure("data/histograms_wine.pickle")
-#     plt.show()
+     fig_histograms = create_histograms(df_wine, df_wine.columns[:6])
+     is_saved = save_img_pickle(fig_histograms, "data/histograms_wine.pickle")
+     print("Figure saved:", is_saved)
+     fig_loaded = load_and_display_figure("data/histograms_wine.pickle")
+     plt.show()

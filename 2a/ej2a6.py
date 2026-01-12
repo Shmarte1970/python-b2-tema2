@@ -37,26 +37,57 @@ import typing as t
 
 
 def gaussian(x: float, amplitude: float, mean: float, stddev: float) -> float:
-    # Write here your code
-    pass
+    return amplitude * np.exp(-((x - mean) ** 2) / (2 * stddev**2))
 
 def gaussian_fit_and_integration(
     data_x: t.List[float], data_y: t.List[float]
 ) -> t.Tuple[t.Tuple[float], float]:
-    # Write here your code
-    pass
+
+    x = np.array(data_x)
+    y = np.array(data_y)
+
+    
+    initial_guess = [
+        np.max(y),          # amplitude
+        x[np.argmax(y)],    # mean
+        np.std(x),          # stddev
+    ]
+
+    
+    params, _ = optimize.curve_fit(gaussian, x, y, p0=initial_guess)
+
+    amplitude, mean, stddev = params
+
+    
+    integral, _ = integrate.quad(
+        gaussian, x.min(), x.max(), args=(amplitude, mean, stddev)
+    )
+
+    return (amplitude, mean, stddev), integral
 
 
 def plot_gaussian_fit(
     data_x: t.List[float], data_y: t.List[float], gaussian_params: t.Tuple[float]
 ):
-    # Write here your code
-    pass
+    x = np.array(data_x)
+    y = np.array(data_y)
+
+    y_fit = gaussian(x, *gaussian_params)
+
+    plt.figure(figsize=(8, 5))
+    plt.scatter(x, y, label="Original Data", alpha=0.6)
+    plt.plot(x, y_fit, label="Gaussian Fit", linewidth=2)
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.title("Gaussian Fit to Data")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 
 # Si quieres probar tu código, descomenta las siguientes líneas y ejecuta el script
-# data_x = np.linspace(-5, 5, 100)
-# data_y = 3 * np.exp(-(data_x - 1) ** 2 / (2 * 1.5 ** 2)) + np.random.normal(0, 0.2, 100)
-# gaussian_params, integral = gaussian_fit_and_integration(data_x, data_y)
-# print("Integral de la curva gaussiana ajustada:", integral)
-# plot_gaussian_fit(data_x, data_y, gaussian_params)
+data_x = np.linspace(-5, 5, 100)
+data_y = 3 * np.exp(-(data_x - 1) ** 2 / (2 * 1.5 ** 2)) + np.random.normal(0, 0.2, 100)
+gaussian_params, integral = gaussian_fit_and_integration(data_x, data_y)
+print("Integral de la curva gaussiana ajustada:", integral)
+plot_gaussian_fit(data_x, data_y, gaussian_params)

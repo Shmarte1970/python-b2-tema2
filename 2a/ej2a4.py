@@ -53,19 +53,55 @@ import typing as t
 
 
 def compare_monthly_sales(
-    sales_year1: list, sales_year2: list, sales_year3: list, months: list
+    sales_year1: list,
+    sales_year2: list,
+    sales_year3: list,
+    months: list
 ) -> t.Tuple[plt.Figure, plt.Axes, plt.Axes]:
-    # Write here your code
-    pass
 
+    # Crear figura con dos subgráficos
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+    x = np.arange(len(months))
+    width = 0.35
+
+    # --- Gráfico de barras (Año 1 y Año 2) ---
+    ax1.bar(x - width / 2, sales_year1, width, label="2020")
+    ax1.bar(x + width / 2, sales_year2, width, label="2021")
+
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(months)
+    ax1.set_ylabel("Monthly Sales")
+    ax1.set_title("Monthly Sales Comparison: 2020 vs 2021")
+    ax1.legend()
+
+    # --- Gráfico de líneas con eje secundario (ventas acumuladas) ---
+    ax1_twin = ax1.twinx()
+    cumulative_2020 = np.cumsum(sales_year1)
+    cumulative_2021 = np.cumsum(sales_year2)
+
+    ax1_twin.plot(x, cumulative_2020, linestyle="--", label="2020 Cumulative")
+    ax1_twin.plot(x, cumulative_2021, linestyle="-.", label="2021 Cumulative")
+    ax1_twin.set_ylabel("Cumulative Sales")
+
+    # Leyenda combinada
+    lines, labels = ax1_twin.get_legend_handles_labels()
+    ax1.legend(ax1.get_legend_handles_labels()[0] + lines,
+               ax1.get_legend_handles_labels()[1] + labels)
+
+    # --- Gráfico de pastel (Año 3) ---
+    ax2.pie(sales_year3, labels=months, autopct="%1.1f%%")
+    ax2.set_title("2022 Monthly Sales Distribution")
+
+    return fig, ax1, ax2
 
 # Para probar el código, descomenta las siguientes líneas
-# sales_2020 = np.random.randint(100, 500, 12)
-# sales_2021 = np.random.randint(100, 500, 12)
-# sales_2022 = np.random.randint(100, 500, 12)
-# months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+sales_2020 = np.random.randint(100, 500, 12)
+sales_2021 = np.random.randint(100, 500, 12)
+sales_2022 = np.random.randint(100, 500, 12)
+months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
-# if __name__ == "__main__":
-#     fig, ax1, ax2 = compare_monthly_sales(sales_2020, sales_2021, sales_2022, months)
-#     plt.show()
+if __name__ == "__main__":
+    fig, ax1, ax2 = compare_monthly_sales(sales_2020, sales_2021, sales_2022, months)
+    plt.show()

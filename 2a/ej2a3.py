@@ -25,10 +25,20 @@ import typing as t
 def create_and_modify_meshgrid(
     start: int, end: int, step: int
 ) -> t.Tuple[np.ndarray, np.ndarray]:
-    # Write here your code
-    pass
+
+    # Crear los arrays x e y
+    x = np.arange(start, end + 1, step)
+    y = np.arange(start, end + 1, step)
+
+    # Crear la cuadrícula con meshgrid
+    X, Y = np.meshgrid(x, y)
+
+    # Modificar la fila 0 de X, reemplazando todos los valores por 99
+    X[0, :] = 99
+
+    return X, Y
 
 
 # Para probar tu código, puedes usar los siguientes parámetros:
-# X, Y = create_and_modify_meshgrid(-5, 5, 1)
-# print(X)
+X, Y = create_and_modify_meshgrid(-5, 5, 1)
+print(X)

@@ -35,24 +35,43 @@ from sklearn.preprocessing import StandardScaler
 
 
 def prepare_data_for_pca(file_path: str) -> pd.DataFrame:
-    # Write here your code
-    pass
-
+    df = pd.read_csv(file_path, skiprows=14)
+   
+    numeric_df = df.select_dtypes(include=["number"])
+   
+    if "MEDV" in numeric_df.columns:
+        numeric_df = numeric_df.drop(columns=["MEDV"])
+    return numeric_df
 
 def perform_pca(data: pd.DataFrame, n_components: int) -> PCA:
-    # Write here your code
-    pass
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data)
+    pca = PCA(n_components=n_components)
+    pca.fit(scaled_data)
+    return pca
 
 
 def plot_pca_results(pca: PCA) -> tuple:
-    # Write here your code
-    pass
+    explained_variance_ratio = pca.explained_variance_ratio_
+    cumulative_variance = explained_variance_ratio.cumsum()
 
+    plt.figure(figsize=(8, 5))
+    plt.bar(range(1, len(explained_variance_ratio) + 1), explained_variance_ratio, alpha=0.5, align='center',
+            label='Individual explained variance')
+    plt.step(range(1, len(cumulative_variance) + 1), cumulative_variance, where='mid', label='Cumulative explained variance')
+    plt.ylabel('Explained variance ratio')
+    plt.xlabel('Principal components')
+    plt.title('PCA Explained Variance')
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.show()
+
+    return explained_variance_ratio, cumulative_variance
 
 # Para probar el código, descomenta las siguientes líneas
-# if __name__ == "__main__":
-#     current_dir = Path(__file__).parent
-#     FILE_PATH = current_dir / "data/housing.csv"
-#     dataset = prepare_data_for_pca(FILE_PATH)
-#     pca = perform_pca(dataset, 4)
-#     _, _ = plot_pca_results(pca)
+if __name__ == "__main__":
+     current_dir = Path(__file__).parent
+     FILE_PATH = current_dir / "data/housing.csv"
+     dataset = prepare_data_for_pca(FILE_PATH)
+     pca = perform_pca(dataset, 4)
+     _, _ = plot_pca_results(pca)

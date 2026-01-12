@@ -39,8 +39,25 @@ import matplotlib.pyplot as plt
 def perform_linear_regression(
     data: pd.DataFrame, variable_1: str, variable_2: str
 ) -> Tuple[float, float, float, float, float]:
-    # Write here your code
-    pass
+
+    
+    if variable_1 not in data.columns or variable_2 not in data.columns:
+        raise ValueError(f"Invalid variables: {variable_1}, {variable_2}")
+
+    
+    df = data[[variable_1, variable_2]].dropna()
+
+    
+    result = linregress(df[variable_1], df[variable_2])
+
+    return (
+        float(result.slope),
+        float(result.intercept),
+        float(result.rvalue),
+        float(result.pvalue),
+        float(result.stderr),
+    )
+
 
 
 def plot_regression_line(
@@ -51,23 +68,43 @@ def plot_regression_line(
     intercept: float,
     return_fig_ax_test=False,
 ):
-    # Write here your code
-    pass
+    x = data[variable_1]
+    y = data[variable_2]
+
+    fig, ax = plt.subplots()
+
+    # Scatter plot
+    ax.scatter(x, y)
+
+    # Línea de regresión
+    x_vals = np.array([x.min(), x.max()])
+    y_vals = intercept + slope * x_vals
+    ax.plot(x_vals, y_vals)
+
+    # Etiquetas
+    ax.set_title(f"Linear Regression between {variable_1} and {variable_2}")
+    ax.set_xlabel(variable_1)
+    ax.set_ylabel(variable_2)
+
+    if return_fig_ax_test:
+        return fig, ax
+
+    plt.show()
 
 
 # Para probar el código, descomenta este código
-# if __name__ == '__main__':
-#     current_dir = Path(__file__).parent
-#     HOUSING_CSV_PATH = current_dir / 'data/housing.csv'
-#     variable_1 = 'RM'
-#     variable_2 = 'MEDV'
-#     data = pd.read_csv(HOUSING_CSV_PATH, skiprows=14)
+if __name__ == '__main__':
+     current_dir = Path(__file__).parent
+     HOUSING_CSV_PATH = current_dir / 'data/housing.csv'
+     variable_1 = 'RM'
+     variable_2 = 'MEDV'
+     data = pd.read_csv(HOUSING_CSV_PATH, skiprows=14)
 
-#     slope, intercept, r_value, p_value, std_err = perform_linear_regression(data, variable_1, variable_2)
+     slope, intercept, r_value, p_value, std_err = perform_linear_regression(data, variable_1, variable_2)
 
-#     print(f'Análisis de Regresión Lineal entre {variable_1} y {variable_2}:')
-#     print(f'Pendiente: {slope}, Intersección: {intercept}, Valor r: {r_value}, Valor p: {p_value},'
-#         f'Error estándar: {std_err}')
+     print(f'Análisis de Regresión Lineal entre {variable_1} y {variable_2}:')
+     print(f'Pendiente: {slope}, Intersección: {intercept}, Valor r: {r_value}, Valor p: {p_value},'
+         f'Error estándar: {std_err}')
 
 #     # Graficar la línea de regresión
-#     fig, ax = plot_regression_line(data, variable_1, variable_2, slope, intercept, return_fig_ax_test=False)
+     fig, ax = plot_regression_line(data, variable_1, variable_2, slope, intercept, return_fig_ax_test=False)

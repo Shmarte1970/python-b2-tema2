@@ -39,18 +39,35 @@ from scipy import stats
 def calculate_pearson_correlation(
     file_path: str, var1: str, var2: str
 ) -> (float, float):
-    # Write here your code
-    pass
+
+    
+    df = pd.read_csv(file_path, skiprows=14)
+
+    
+    if var1 not in df.columns or var2 not in df.columns:
+        raise ValueError(f"Invalid variables: {var1}, {var2}")
+
+    
+    x = df[var1]
+    y = df[var2]
+    valid_data = pd.concat([x, y], axis=1).dropna()
+
+    
+    correlation, p_value = stats.pearsonr(
+        valid_data[var1], valid_data[var2]
+    )
+
+    return correlation, p_value
 
 
 # Para probar el código, descomenta las siguientes líneas
-# if __name__ == "__main__":
-#     current_dir = Path(__file__).parent
-#     HOUSING_CSV_PATH = current_dir / 'data/housing.csv'
-#     variable_1 = 'MEDV'
-#     variable_2 = 'RM'
-#     correlation, p_value = calculate_pearson_correlation(HOUSING_CSV_PATH, variable_1, variable_2)
+if __name__ == "__main__":
+    current_dir = Path(__file__).parent
+    HOUSING_CSV_PATH = current_dir / 'data/housing.csv'
+    variable_1 = 'MEDV'
+    variable_2 = 'RM'
+    correlation, p_value = calculate_pearson_correlation(HOUSING_CSV_PATH, variable_1, variable_2)
 
 #     # Mostrar el coeficiente de correlación de Pearson y el valor p
-#     print(f'Columnas comparadas: {variable_1} y {variable_2}')
-#     print(f'Correlación de Pearson: {correlation}, Valor p: {p_value}')
+    print(f'Columnas comparadas: {variable_1} y {variable_2}')
+    print(f'Correlación de Pearson: {correlation}, Valor p: {p_value}')

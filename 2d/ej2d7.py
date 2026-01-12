@@ -39,26 +39,57 @@ import matplotlib.pyplot as plt
 
 
 def prepare_data_for_clustering(file_path: str) -> pd.DataFrame:
-    # Write here your code
-    pass
+    
+    data = pd.read_csv(file_path)
+
+    
+    data_numeric = data.select_dtypes(include=[np.number])
+
+    
+    scaler = StandardScaler()
+    data_scaled = scaler.fit_transform(data_numeric)
+
+    return data_scaled
 
 
 def perform_kmeans_clustering(data: np.ndarray, n_clusters: int) -> np.ndarray:
-    # Write here your code
-    pass
+
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+
+    labels = kmeans.fit_predict(data)
+
+    return labels
 
 
 def visualize_clusters(
     data: np.ndarray, labels: np.ndarray, is_testing_execution: bool = False
 ) -> Tuple[np.ndarray, plt.Figure, plt.Axes]:
-    # Write here your code
-    pass
+    
+    pca = PCA(n_components=2)
 
+    data_reduced = pca.fit_transform(data)
+
+    
+    fig, ax = plt.subplots()
+    scatter = ax.scatter(
+        data_reduced[:, 0],
+        data_reduced[:, 1],
+        c=labels
+    )
+
+    ax.set_title("KMeans Clustering Visualization")
+    ax.set_xlabel("Principal Component 1")
+    ax.set_ylabel("Principal Component 2")
+
+    if not is_testing_execution:
+        plt.show()
+
+    return data_reduced, fig, ax
 
 # Para probar el código, desconmenta las siguientes líneas
-# if __name__ == '__main__':
-#     current_dir = Path(__file__).parent
-#     file_path = current_dir / 'data/german_credit_data.csv'
-#     data = prepare_data_for_clustering(file_path)
-#     labels = perform_kmeans_clustering(data, 5)
-#     data_reduced, fig, ax = visualize_clusters(data, labels, False)
+if __name__ == '__main__':
+     current_dir = Path(__file__).parent
+     file_path = current_dir / 'data/german_credit_data.csv'
+     data = prepare_data_for_clustering(file_path)
+     labels = perform_kmeans_clustering(data, 5)
+     data_reduced, fig, ax = visualize_clusters(data, labels, False)

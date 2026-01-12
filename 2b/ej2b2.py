@@ -42,32 +42,54 @@ Salida esperada:
 import pandas as pd
 import typing as t
 from pathlib import Path
+import json
 
 
 def read_json_basic(file_path: str) -> pd.DataFrame:
-    # Write here your code
-    pass
+    try:
+        df = pd.read_json(file_path, lines=True)
+    except ValueError:
+        # Si falla, intentamos como JSON estándar
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        df = pd.DataFrame(data)
+    return df
 
 
 def read_json_with_orientation(file_path: str, orient: str) -> pd.DataFrame:
-    # Write here your code
-    pass
+    if orient == "table":
+        df = pd.read_json(file_path, orient=orient)
+    elif orient == "records":
+        # Puede ser JSON Lines o lista de dicts
+        try:
+            df = pd.read_json(file_path, orient=orient, lines=True)
+        except ValueError:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            df = pd.DataFrame(data)
+    else:
+        # Para orientaciones 'index' o 'split'
+        df = pd.read_json(file_path, orient=orient)
+    return df
 
 def read_json_and_normalize(file_path: str, record_path: t.List[str]) -> pd.DataFrame:
-    # Write here your code
-    pass
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    
+    df = pd.json_normalize(data, record_path=record_path)
+    return df
 
 # Para probar el código, descomenta las siguientes líneas
-# current_dir = Path(__file__).parent
-# json_basic_path = current_dir / "data/ej2b2/ramen-ratings.json"
-# json_orient_path = current_dir / "data/ej2b2/ramen-ratings-records.json"
-# json_table_oriented_path = current_dir / "data/ej2b2/ramen-ratings-table.json"
-# json_normalize_path = current_dir / "data/ej2b2/ramen-ratings-nested.json"
+current_dir = Path(__file__).parent
+json_basic_path = current_dir / "data/ej2b2/ramen-ratings.json"
+json_orient_path = current_dir / "data/ej2b2/ramen-ratings-records.json"
+json_table_oriented_path = current_dir / "data/ej2b2/ramen-ratings-table.json"
+json_normalize_path = current_dir / "data/ej2b2/ramen-ratings-nested.json"
 
-# df_basic = read_json_basic(json_basic_path)
-# df_orient = read_json_with_orientation(json_orient_path, orient="records")
-# df_table_oriented = read_json_with_orientation(json_table_oriented_path, orient="table")
-# df_normalized = read_json_and_normalize(json_normalize_path, record_path=["data"])
+df_basic = read_json_basic(json_basic_path)
+df_orient = read_json_with_orientation(json_orient_path, orient="records")
+df_table_oriented = read_json_with_orientation(json_table_oriented_path, orient="table")
+df_normalized = read_json_and_normalize(json_normalize_path, record_path=["data"])
 
 # # Mostrar los primeros registros de cada DataFrame
-# print(df_basic.head(), df_orient.head(), df_table_oriented.head(), df_normalized.head())
+print(df_basic.head(), df_orient.head(), df_table_oriented.head(), df_normalized.head())

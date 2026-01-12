@@ -30,27 +30,51 @@ from pathlib import Path
 
 
 def read_excel_sheet(file_path: str) -> pd.DataFrame:
-    # Write here your code
-    pass 
-
-
+   
+    df = pd.read_excel(file_path, sheet_name="Sheet1")
+    return df
 
 def read_excel_custom_sheet(file_path: str) -> pd.DataFrame:
-    def is_not_empty_column(col):
-        # Write here your code
-        pass
+   
+   
+    df = pd.read_excel(file_path, sheet_name="Sheet2", header=None)
+    
+   
+    header_row_index = 0
+    for i, row in df.iterrows():
+        if "Brand" in row.values:
+            header_row_index = i
+            break
+    
+   
+    df.columns = df.iloc[header_row_index]
+    
+   
+    df = df.iloc[header_row_index + 1:]
+    
+   
+    df = df.dropna(axis=1, how="all")
+    
+   
+    expected_columns = ["Brand", "Country", "Review #", "Stars", "Style", "Top Ten", "Variety"]
+    df = df[df[expected_columns].apply(lambda row: not all(str(x).strip() in ["", "AVOID"] for x in row), axis=1)]
+    
+   
+    df = df.reset_index(drop=True)
+    
+    return df
 
 
 # Para probar el código, descomenta las siguientes líneas
-# file_path = "data/ej2b4/ramen-ratings.xlsx"
-# current_dir = Path(__file__).parent
-# excel_file_path = current_dir / file_path
+file_path = "data/ej2b4/ramen-ratings.xlsx"
+current_dir = Path(__file__).parent
+excel_file_path = current_dir / file_path
 
-# df_from_sheet1 = read_excel_sheet(excel_file_path)
-# df_from_sheet2 = read_excel_custom_sheet(excel_file_path)
+df_from_sheet1 = read_excel_sheet(excel_file_path)
+df_from_sheet2 = read_excel_custom_sheet(excel_file_path)
 
 # # Mostrar la cantidad de registros y los nombres de las columnas
-# print(f"Registros en la hoja 1: {len(df_from_sheet1)}")
-# print(f"Nombres de columnas en la hoja 1: {df_from_sheet1.columns.tolist()}")
-# print(f"Registros en la hoja 2: {len(df_from_sheet2)}")
-# print(f"Nombres de columnas en la hoja 2: {df_from_sheet2.columns.tolist()}")
+print(f"Registros en la hoja 1: {len(df_from_sheet1)}")
+print(f"Nombres de columnas en la hoja 1: {df_from_sheet1.columns.tolist()}")
+print(f"Registros en la hoja 2: {len(df_from_sheet2)}")
+print(f"Nombres de columnas en la hoja 2: {df_from_sheet2.columns.tolist()}")

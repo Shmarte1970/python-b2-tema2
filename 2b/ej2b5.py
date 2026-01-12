@@ -44,34 +44,52 @@ Salida esperada:
 
 import pandas as pd
 import typing as t
+import requests
+from io import StringIO
+
+def read_population_data(url, match_text=None):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/120.0.0.0 Safari/537.36"
+    }
+    
+   
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    
+    html_content = response.text
+    
+ 
+    tables = pd.read_html(StringIO(html_content), attrs={"class": "wikitable"})
+    
+    if match_text:
+        tables = [t for t in tables if t.astype(str).apply(lambda x: x.str.contains(match_text)).any().any()]
+    
+    return tables
 
 
-def read_population_data(url: str, match_text: str = None) -> t.List[pd.DataFrame]:
-    # Write here your code
-    pass
-
-
-def get_table_by_string_match(
-    tables: t.List[pd.DataFrame], match_text: str
-) -> t.Union[pd.DataFrame, None]:
-    # Write here your code
-    pass
+def get_table_by_string_match(tables: t.List[pd.DataFrame], match_text: str):
+    for df in tables:
+        if "Location" in df.columns and df["Location"].str.contains(match_text, case=False).any():
+            return df
+    return None
 
 
 def count_tables(tables: t.List[pd.DataFrame]) -> int:
-    # Write here your code
-    pass
+   
+    return len(tables)
 
 
 # Para probar el código, descomenta las siguientes líneas
-# url = "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population"
-# tables = read_population_data(url)
-# print(f"Número de tablas en la página: {count_tables(tables)}")
-# selected_table = get_table_by_string_match(tables, "Spain")
+url = "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population"
+tables = read_population_data(url)
+print(f"Número de tablas en la página: {count_tables(tables)}")
+selected_table = get_table_by_string_match(tables, "Spain")
 
-# if selected_table is not None:
-#     print(f"Registros en la tabla: {len(selected_table)}")
-#     print(f"Nombres de columnas: {selected_table.columns.tolist()}")
-#     print(selected_table)
-# else:
-#     print("No se encontró la tabla con el texto proporcionado.")
+if selected_table is not None:
+    print(f"Registros en la tabla: {len(selected_table)}")
+    print(f"Nombres de columnas: {selected_table.columns.tolist()}")
+    print(selected_table)
+else:
+    print("No se encontró la tabla con el texto proporcionado.")
